@@ -1,4 +1,4 @@
-aimport os, sqlite3
+import os, sqlite3
 from io import BytesIO
 from functools import wraps
 from flask import Flask, render_template, request, redirect, url_for, flash, send_file, abort
@@ -132,7 +132,7 @@ def login():
     return render_template("login.html")
 
 @app.route("/logout")
-@login_requireda
+@login_required
 def logout():
     logout_user(); return redirect(url_for("index"))
 
