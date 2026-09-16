@@ -1,4 +1,4 @@
-import os, sqlite3
+aimport os, sqlite3
 from io import BytesIO
 from functools import wraps
 from flask import Flask, render_template, request, redirect, url_for, flash, send_file, abort
@@ -111,19 +111,28 @@ def register(role):
 
 @app.route("/login", methods=["GET","POST"])
 def login():
-    if request.method=="POST":
-        email=request.form["email"].strip().lower(); password=request.form["password"]
-        con=db(); u=con.execute("SELECT * FROM users WHERE email=?",(email,)).fetchone(); con.close()
-        if u and check_password_hash(u["password"],password):
-            login_user(type("U",(UserMixin,),{})())
-            # Re-login with proper object
-            obj=load_user(u["id"]); logout_user(); login_user(obj)
+    if request.method == "POST":
+        email = request.form["email"].strip().lower()
+        password = request.form["password"]
+
+        con = db()
+        u = con.execute(
+            "SELECT * FROM users WHERE email=?",
+            (email,)
+        ).fetchone()
+        con.close()
+
+        if u and check_password_hash(u["password"], password):
+            obj = load_user(u["id"])
+            login_user(obj)
             return redirect(url_for("dashboard"))
+
         flash("E-mail ou mot de passe incorrect.")
+
     return render_template("login.html")
 
 @app.route("/logout")
-@login_required
+@login_requireda
 def logout():
     logout_user(); return redirect(url_for("index"))
 
@@ -228,6 +237,8 @@ def class_photo(cid):
         name=secure_filename(f.filename); path=os.path.join(UPLOAD,f"class_{cid}_{name}"); f.save(path)
         con=db(); con.execute("UPDATE classes SET photo=? WHERE id=?",(os.path.basename(path),cid)); con.commit(); con.close()
     return redirect(url_for("dashboard"))
+
+init_db()
 
 if __name__=="__main__":
     app.run(debug=False, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
